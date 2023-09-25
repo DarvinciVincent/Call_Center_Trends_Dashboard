@@ -3,13 +3,11 @@
 
 ## Table of Contents :
 
-- [Problem Statement](https://github.com/yogeshkasar778/PWC_task-Call_Centre_trends-dashboard/edit/main/README.md#problem-statement-)
-- [Datasource](https://github.com/yogeshkasar778/PWC_task-Call_Centre_trends-dashboard/edit/main/README.md#datasource-)
-- [Data Preparation](https://github.com/yogeshkasar778/PWC_task-Call_Centre_trends-dashboard/edit/main/README.md#data-preparation)
-- [Data Modelling](https://github.com/yogeshkasar778/PWC_task-Call_Centre_trends-dashboard/edit/main/README.md#data-modeling)
-- [Data Analysis (DAX)](https://github.com/yogeshkasar778/PWC_task-Call_Centre_trends-dashboard/edit/main/README.md#data-analysis-dax)
-- [Data Visualization Dashboard](https://github.com/yogeshkasar778/PWC_task-Call_Centre_trends-dashboard/edit/main/README.md#data-visualization-dashboard-)
-- [Insights](https://github.com/yogeshkasar778/PWC_task-Call_Centre_trends-dashboard/edit/main/README.md#insights-)
+- [Problem Statement](https://github.com/DarvinciVincent/Call_Center_Trends_Dashboard/blob/main/README.md#problem-statement-)
+- [Datasource](https://github.com/DarvinciVincent/Call_Center_Trends_Dashboard/blob/main/README.md#datasource-)
+- [Data Preparation](https://github.com/DarvinciVincent/Call_Center_Trends_Dashboard/blob/main/README.md#data-preparation)
+- [Data Analysis (DAX)](https://github.com/DarvinciVincent/Call_Center_Trends_Dashboard/blob/main/README.md#data-analysis-dax)
+- [Insights](https://github.com/DarvinciVincent/Call_Center_Trends_Dashboard/blob/main/README.md#insights-)
 
 
 ## Problem Statement :
@@ -27,7 +25,7 @@ Possible KPIs include (but not limited to):
 
 Dataset used for this task was presented by [Pwc](https://www.pwc.ch/en/careers-with-pwc/students/virtual-case-experience.html) and call centre trends dataset:
 
-Dataset: [Call Centre Trends](https://github.com/yogeshkasar778/PWC_task-Call_Centre_trends-dashboard/blob/main/01%20Call-Center-Dataset.xlsx)
+Dataset: [Call Centre Trends](https://github.com/DarvinciVincent/Call_Center_Trends_Dashboard/blob/main/01%20Call-Center-Dataset.xlsx)
 
 ## Data Preparation:
 
@@ -43,56 +41,55 @@ Data Cleaning for the dataset was done in the power query editor as follows:
 - Removed Unnecessary rows
 - Each of the columns in the table were validated to have the correct data type
 
-## Data Modeling:
-
-And then dataset was cleaned and transformed, it was ready to the data modeled.
-
-- The `measure table` and `call centre trends` tables as show below:
-
--![Screenshot (37)](https://user-images.githubusercontent.com/118357991/227766088-7fe8f2b3-b4b3-4cfd-a925-0895874ea956.png)
-
 ## Data Analysis (DAX):
 
-Measures used in  all visualization are:
+Measures used in all visualizations are:
 
-- Average of seed of answerd = `AVERAGE('call centre trends'[Speed of answer in seconds])`
+- Avg rating = 'AVERAGE(Sheet1[Satisfaction rating])'
 
-- Average of statisfaction = `AVERAGE('call centre trends'[Satisfaction rating])`
+- Avg rating star rating = <br>
+'VAR __MAX_NUMBER_OF_STARS = 5<br>
+VAR __MIN_RATED_VALUE = 0<br>
+VAR __MAX_RATED_VALUE = 5<br>
+VAR __BASE_VALUE = [Avg rating]<br>
+VAR __NORMALIZED_BASE_VALUE =<br>
+	MIN(<br>
+		MAX(<br>
+			DIVIDE(<br>
+				__BASE_VALUE - __MIN_RATED_VALUE,<br>
+				__MAX_RATED_VALUE - __MIN_RATED_VALUE<br>
+			),<br>
+			<br>
+		<br>
+		1<br>
+	)<br>
+VAR __STAR_RATING = ROUND(__NORMALIZED_BASE_VALUE * __MAX_NUMBER_OF_STARS, 0)<br>
+RETURN<br>
+	IF(<br>
+		NOT ISBLANK(__BASE_VALUE),<br>
+		REPT(UNICHAR(9733), __STAR_RATING)<br>
+			& REPT(UNICHAR(9734), __MAX_NUMBER_OF_STARS - __STAR_RATING)<br>
+	)'
 
-- Count satisfation rating = `COUNT('call centre trends'[Satisfaction rating])`
+- Call Answered Rate = <br>
+'DIVIDE(<br>
+    COUNTROWS(FILTER(Sheet1, [Answered (Y/N)] = "Y")),<br>
+    COUNTROWS(Sheet1),<br>
+    0<br>
+)'
 
-- Overall Customer Satisfation = `DIVIDE([Possitive satisfation rating],[Count satisfation rating],0)`
+- Calls Abandoned Rate = 'SUMX(Sheet1, IF([Answered (Y/N)] = "N", 1, 0)) / COUNTROWS(Sheet1)'
 
-- Possitive satisfation rating = `CALCULATE(COUNT('call centre trends'[Satisfaction rating]),FILTER('call centre trends','call centre trends'[Satisfaction rating] IN {4,5}))`
+- Resolved Queries w.r.t Call Answer = 'COUNTROWS(FILTER(Sheet1, [Resolved] = "Y" && [Answered (Y/N)] = "Y"))'
 
-- resolved calls = `COUNTX(FILTER('call centre trends','call centre trends'[Resolved] = "Yes"), 'call centre trends'[Resolved])`
+- Y_Answer = 'COUNTROWS(FILTER(Sheet1, Sheet1[Answered (Y/N)] = "Y"))'
 
-- Unresolved calls = `COUNTX(FILTER('call centre trends','call centre trends'[Resolved] = "No"), 'call centre trends'[Resolved])`
+- Y_Resolved = 'COUNTROWS(FILTER(Sheet1, Sheet1[Resolved] = "Y"))'
 
-- total calls =  `CALCULATE('Table'[total calls answered] + 'Table'[total calls unanswred])`
+- YValuesColumn = 'IF([Answered (Y/N)] = "Y", "Y", BLANK())'
 
-- total calls answered = `COUNTX(FILTER('call centre trends','call centre trends'[Answered (Y/N)] = "Yes"),'call centre trends'[Answered (Y/N)])`
-
-- total calls unanswred =`COUNTX(FILTER('call centre trends','call centre trends'[Answered (Y/N)] = "No"), 'call centre trends'[Answered (Y/N)])`
-
-## Data Visualization (Dashboard) :
-
-Data visualization for the data analysis (DAX) was done in Microsoft Power BI Desktop:
-
-Shows visualizations from Call Center Trends :
-
-| Call Centre Trends (Overview) |
-| ----------- |
-| ![PWC Task 1 - Call Centre Dashboard-1](https://user-images.githubusercontent.com/118357991/227767359-463d93ee-5436-4f6a-ab7d-705c11d0dfbf.png) |
-
-
-| Call Centre Trends (Agent's Performance) |
-| ----------- |
-| ![PWC Task 1 - Call Centre Dashboard-2](https://user-images.githubusercontent.com/118357991/227767508-8667b273-6a78-40fa-bc20-78fc88c155cc.png) |
 
 ## Insights :
-
-As shown by Data Visualization, It can be deduced that:
 
 - Most of the satisfaction ratings from each call are 3 and 4.
 - The average satisfaction rating has decreased over the span of three months. January brought the highest satisfaction rating and march the lowest.
@@ -101,7 +98,7 @@ As shown by Data Visualization, It can be deduced that:
 - The average speed of answer by Joe is the highest.
 - The call resolution rate of Jim is the highest, even though the average speed of his answers is lower compared to those of Joe, Martha and Dan. The call answered by - him are also higher than the average number of calls answered.
 - Becky's speed of answer is the lowest among all, and her rate of calls resolved is higher. She is in the 5th position in the call resolution rate. 
-- Martha has the highest  speed of answered in the sec
+- Martha has the highest  speed of answered in the sec.
 
 ---
 
